@@ -11,7 +11,6 @@ use Koha::Account::Lines;
 use Koha::Patrons;
 
 use Locale::Currency::Format;
-use Digest::MD5 qw(md5_hex);
 use HTML::Entities;
 
 ## Here we set our plugin version
@@ -138,10 +137,6 @@ sub opac_online_payment_begin {
           . "/cgi-bin/koha/opac-account.pl?payment_method=Koha::Plugin::Com::imCode::SwedbankPay" );
 
 
-    # MD5
-    my $md51 = md5_hex($self->retrieve_data('MD5k1') . 'merchant=' . $self->retrieve_data('DIBSMerchantID') . "&orderid=$transaction_id&currency=$local_currency&amount=$sum");
-    my $md5checksum = md5_hex($self->retrieve_data('MD5k2') . $md51);
-
     # Test mode?
     my $test = $self->retrieve_data('testMode');
 
@@ -154,7 +149,7 @@ sub opac_online_payment_begin {
         amount       => $sum,
         callbackurl  => $callback_url,
         currency     => $local_currency,
-        merchant     => $self->retrieve_data('DIBSMerchantID'),
+        merchant     => $self->retrieve_data('SwedbankPayPayeeID'),
         orderid      => $transaction_id,
         
         # Optional fields
@@ -166,7 +161,6 @@ sub opac_online_payment_begin {
         billingPostalCode  => $borrower_result->zipcode,
         billingPostalPlace => $borrower_result->city,
         email              => $borrower_result->email,
-        md5key             => $md5checksum,
         test               => $test
     );
 
@@ -258,9 +252,8 @@ sub configure {
         ## Grab the values we already have for our settings, if any exist
         $template->param(
             enable_opac_payments => $self->retrieve_data('enable_opac_payments'),
-            DIBSMerchantID       => $self->retrieve_data('DIBSMerchantID'),
-            MD5k1                => $self->retrieve_data('MD5k1'),
-            MD5k2                => $self->retrieve_data('MD5k2'),
+            SwedbankPayPayeeID   => $self->retrieve_data('SwedbankPayPayeeID'),
+            SwedbankPayPayeeName => $self->retrieve_data('SwedbankPayPayeeName'),
             testMode             => $self->retrieve_data('testMode')
         );
 
@@ -270,9 +263,8 @@ sub configure {
         $self->store_data(
             {
                 enable_opac_payments => $cgi->param('enable_opac_payments'),
-                DIBSMerchantID       => $cgi->param('DIBSMerchantID'),
-                MD5k1                => $cgi->param('MD5k1'),
-                MD5k2                => $cgi->param('MD5k2'),
+                SwedbankPayPayeeID   => $cgi->param('SwedbankPayPayeeID'),
+                SwedbankPayPayeeName => $cgi->param('SwedbankPayPayeeName'),
                 testMode             => $cgi->param('testMode')
             }
         );

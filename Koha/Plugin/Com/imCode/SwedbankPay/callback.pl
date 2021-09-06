@@ -29,7 +29,6 @@ use Koha::Patrons;
 use Koha::Plugin::Com::imCode::SwedbankPay;
 
 use XML::LibXML;
-use Digest::MD5 qw(md5_hex);
 use Locale::Currency;
 use Locale::Currency::Format;
 
@@ -73,15 +72,6 @@ if ($statuscode and $statuscode == 2) {
     my $currency = code2currency($local_currency, LOCALE_CURR_ALPHA);
     my $currency_number = currency2code($currency, LOCALE_CURR_NUMERIC);
     my $decimals = decimal_precision($local_currency);
-
-    # DIBS require "The smallest unit of an amount in the selected currency, following the ISO4217 standard." 
-    $md5amount = $amount * 10**$decimals;
-
-    my $md5string = "transact=$dibs_transaction_id&amount=$md5amount&currency=$currency_number";
-    my $md51 = md5_hex($paymentHandler->retrieve_data('MD5k1') . $md5string);
-    my $md5checksum = md5_hex($paymentHandler->retrieve_data('MD5k2') . $md51);
-
-    warn "wrong authkey" and return unless ($authkey == $md5checksum);
 
     my @accountline_ids = split(' ', $accountlines_string);
     my $borrower = Koha::Patrons->find($borrowernumber);

@@ -36,18 +36,13 @@
 
         <p>
 
-        <label for="DIBSMerchantID">DIBS Merchant ID: </label>
-        <input type="text" name="DIBSMerchantID" value="[% DIBSMerchantID %]" />
+        <label for="SwedbankPayPayeeID">Payee ID: </label>
+        <input type="text" name="SwedbankPayPayeeID" value="[% SwedbankPayPayeeID %]" />
 
         <p>
 
-        <label for="MD5k1">MD5 k1: </label>
-        <input type="text" name="MD5k1" value="[% MD5k1 %]" />
-
-        <p>
-
-        <label for="MD5k2">MD5 k2: </label>
-        <input type="text" name="MD5k2" value="[% MD5k2 %]" />
+        <label for="SwedbankPayPayeeName">Payee Name: </label>
+        <input type="text" name="SwedbankPayPayeeName" value="[% SwedbankPayPayeeName %]" />
 
         <p>
 

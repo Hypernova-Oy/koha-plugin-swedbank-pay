@@ -40,7 +40,6 @@
                         <input id="merchant" name="merchant" type="hidden" value="[% merchant %]"/>
                         <input id="orderid" name="orderid" type="hidden" value="[% orderid %]"/>
                         <input id="lang" name="lang" type="hidden" value="[% lang %]"/>
-                        <input id="md5key" name="md5key" type="hidden" value='[% md5key %]'/>
                     </form>
                 </div>
             </div>
