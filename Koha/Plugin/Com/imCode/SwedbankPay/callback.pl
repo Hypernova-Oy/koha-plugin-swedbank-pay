@@ -55,7 +55,7 @@ if ($statuscode and $statuscode == 2) {
     # https://tech.dibspayment.com/D2/Hosted/Output_parameters/Return_parameter_configuration
     # And even though it is selectable in the admin configuration (Integration -> return values)
     # it is never returned
-    my $table = $paymentHandler->get_qualified_table_name('dibs_transactions');
+    my $table = $paymentHandler->get_qualified_table_name('swedbank_pay_transactions');
     my $dbh   = C4::Context->dbh;
     my $sth   = $dbh->prepare(
         "SELECT borrowernumber, accountlines_ids, amount FROM $table WHERE transaction_id = ?");
@@ -97,7 +97,7 @@ if ($statuscode and $statuscode == 2) {
         }
     ); 
 
-    # Link payment to dibs_transactions
+    # Link payment to swedbank_pay_transactions
     my $dbh   = C4::Context->dbh;
     my $sth   = $dbh->prepare(
         "UPDATE $table SET accountline_id = ? WHERE transaction_id = ?");

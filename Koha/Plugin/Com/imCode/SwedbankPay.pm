@@ -111,12 +111,12 @@ sub opac_online_payment_begin {
 
     # Create a transaction
     my $dbh   = C4::Context->dbh;
-    my $table = $self->get_qualified_table_name('dibs_transactions');
+    my $table = $self->get_qualified_table_name('swedbank_pay_transactions');
     my $sth = $dbh->prepare("INSERT INTO $table (`transaction_id`, `borrowernumber`, `accountlines_ids`, `amount`) VALUES (?,?,?,?)");
     $sth->execute("NULL", $borrowernumber, join(" ", $cgi->multi_param('accountline')), $sum);
 
     my $transaction_id =
-      $dbh->last_insert_id( undef, undef, qw(dibs_transactions transaction_id) );
+      $dbh->last_insert_id( undef, undef, qw(swedbank_pay_transactions transaction_id) );
 
     # DIBS require "The smallest unit of an amount in the selected currency, following the ISO4217 standard." 
     if ($decimals > 0) {
@@ -191,7 +191,7 @@ sub opac_online_payment_end {
     my $transaction_id = $cgi->param('orderid');
 
     # Check payment went through here
-    my $table = $self->get_qualified_table_name('dibs_transactions');
+    my $table = $self->get_qualified_table_name('swedbank_pay_transactions');
     my $dbh   = C4::Context->dbh;
     my $sth   = $dbh->prepare(
         "SELECT accountline_id FROM $table WHERE transaction_id = ?");
@@ -287,7 +287,7 @@ sub configure {
 sub install() {
     my ( $self, $args ) = @_;
 
-    my $table = $self->get_qualified_table_name('dibs_transactions');
+    my $table = $self->get_qualified_table_name('swedbank_pay_transactions');
 
     return C4::Context->dbh->do( "
         CREATE TABLE IF NOT EXISTS $table (
