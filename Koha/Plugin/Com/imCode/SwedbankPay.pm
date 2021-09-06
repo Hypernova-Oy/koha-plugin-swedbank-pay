@@ -15,19 +15,21 @@ use Digest::MD5 qw(md5_hex);
 use HTML::Entities;
 
 ## Here we set our plugin version
-our $VERSION = "00.00.02";
+our $VERSION = "00.00.01";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
-    name            => 'DIBS Payments Plugin',
-    author          => 'Matthias Meusburger',
-    date_authored   => '2019-07-01',
-    date_updated    => "2020-07-27",
+    name            => 'Swedbank Payments Plugin',
+    author          => 'imCode',
+    date_authored   => '2021-09-06',
+    date_updated    => "2021-09-06",
     minimum_version => '17.11.00.000',
     maximum_version => '',
     version         => $VERSION,
     description     => 'This plugin implements online payments using '
-      . 'DIBS payments platform. https://tech.dibspayment.com/D2',
+      . 'Swedbank payments platform. https://developer.swedbankpay.com/payment-instruments/swish/redirect '
+      . 'Forked from DIBS Payments Plugin by Matthias Meusburger '
+      . 'https://github.com/Libriotech/koha-plugin-dibs-payments',
 };
 
 sub new {
