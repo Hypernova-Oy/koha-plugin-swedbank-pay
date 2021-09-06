@@ -1,4 +1,4 @@
-package Koha::Plugin::Com::BibLibre::DIBSPayments;
+package Koha::Plugin::Com::imCode::SwedbankPay;
 
 use Modern::Perl;
 
@@ -123,7 +123,7 @@ sub opac_online_payment_begin {
 
     # Construct redirect URI
     my $accepturl = URI->new( C4::Context->preference('OPACBaseURL')
-          . "/cgi-bin/koha/opac-account-pay-return.pl?payment_method=Koha::Plugin::Com::BibLibre::DIBSPayments" );
+          . "/cgi-bin/koha/opac-account-pay-return.pl?payment_method=Koha::Plugin::Com::imCode::SwedbankPay" );
 
     # Construct callback URI
     my $callback_url =
@@ -133,7 +133,7 @@ sub opac_online_payment_begin {
 
     # Construct cancel URI
     my $cancel_url = URI->new( C4::Context->preference('OPACBaseURL')
-          . "/cgi-bin/koha/opac-account.pl?payment_method=Koha::Plugin::Com::BibLibre::DIBSPayments" );
+          . "/cgi-bin/koha/opac-account.pl?payment_method=Koha::Plugin::Com::imCode::SwedbankPay" );
 
 
     # MD5

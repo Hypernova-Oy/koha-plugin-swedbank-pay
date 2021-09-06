@@ -26,14 +26,14 @@ use Koha::Account;
 use Koha::Account::Lines;
 use Koha::Account::Line;
 use Koha::Patrons;
-use Koha::Plugin::Com::BibLibre::DIBSPayments;
+use Koha::Plugin::Com::imCode::SwedbankPay;
 
 use XML::LibXML;
 use Digest::MD5 qw(md5_hex);
 use Locale::Currency;
 use Locale::Currency::Format;
 
-my $paymentHandler = Koha::Plugin::Com::BibLibre::DIBSPayments->new;
+my $paymentHandler = Koha::Plugin::Com::imCode::SwedbankPay->new;
 my $input = new CGI;
 my $statuscode = $input->param('statuscode');
 
