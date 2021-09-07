@@ -36,9 +36,9 @@ Package up the relevant parts as a .kpz Koha plugin file.
 use Modern::Perl;
 use lib '.';
 
-use Koha::Plugin::Com::BibLibre::DIBSPayments;
-my $version  = $Koha::Plugin::Com::BibLibre::DIBSPayments::VERSION;
-my $filename = "/tmp/koha-plugin-dibs-payments-$version.kpz";
+use Koha::Plugin::Com::imCode::SwedbankPay;
+my $version  = $Koha::Plugin::Com::imCode::SwedbankPay::VERSION;
+my $filename = "/tmp/koha-plugin-swedbank-pay-$version.kpz";
 
 say `zip -r $filename Koha/`;
 

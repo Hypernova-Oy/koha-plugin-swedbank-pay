@@ -41,19 +41,12 @@ if ($statuscode and $statuscode == 2) {
     my $koha_transaction_id = $input->param('orderid');
     warn "orderid missing" and return unless ($koha_transaction_id);
 
-    my $dibs_transaction_id = $input->param('transact');
-    warn "transact missing" and return unless ($dibs_transaction_id);
+    my $swedbank_transaction_id = $input->param('transact');
+    warn "transact missing" and return unless ($swedbank_transaction_id);
 
     my $authkey = $input->param('authkey');
     warn "authkey missing" and return unless ($authkey);
 
-    # We are getting the amount from the database and not from the parameters,
-    # because this page says it can be returned:
-    # https://tech.dibspayment.com/D2/Hosted/Output_parameters/Return_parameters
-    # this page doesn't mention it:
-    # https://tech.dibspayment.com/D2/Hosted/Output_parameters/Return_parameter_configuration
-    # And even though it is selectable in the admin configuration (Integration -> return values)
-    # it is never returned
     my $table = $paymentHandler->get_qualified_table_name('swedbank_pay_transactions');
     my $dbh   = C4::Context->dbh;
     my $sth   = $dbh->prepare(
@@ -81,7 +74,7 @@ if ($statuscode and $statuscode == 2) {
     my $accountline_id = $account->pay(
         {   
             amount     => $amount,
-            note       => 'DIBS Payment',                                                                 
+            note       => 'Swedbank Pay Payment',                                                                 
             library_id => $borrower->branchcode,                                                         
             lines => $lines,    # Arrayref of Koha::Account::Line objects to pay                         
         }

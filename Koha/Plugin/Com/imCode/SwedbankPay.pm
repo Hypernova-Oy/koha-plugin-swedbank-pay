@@ -117,7 +117,7 @@ sub opac_online_payment_begin {
     my $transaction_id =
       $dbh->last_insert_id( undef, undef, qw(swedbank_pay_transactions transaction_id) );
 
-    # DIBS require "The smallest unit of an amount in the selected currency, following the ISO4217 standard." 
+    # ISO4217
     if ($decimals > 0) {
         $sum = $sum * 10**$decimals;
     }
@@ -142,7 +142,7 @@ sub opac_online_payment_begin {
 
 	$template->param(
 
-        DIBSURL => 'https://payment.architrade.com/paymentweb/start.action',
+        SWEDBANKURL => 'https://payment.architrade.com/paymentweb/start.action',
 
         # Required fields
         accepturl    => $accepturl,
