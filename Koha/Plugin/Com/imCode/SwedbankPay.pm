@@ -31,6 +31,12 @@ our $metadata = {
       . 'https://github.com/Libriotech/koha-plugin-dibs-payments',
 };
 
+our $transaction_status = {
+    PENDING => 'pending',
+    COMPLETED => 'completed',
+    CANCELLED => 'cancelled',
+};
+
 sub new {
     my ( $class, $args ) = @_;
 
@@ -281,6 +287,8 @@ sub install() {
 
     my $table = $self->get_qualified_table_name('swedbank_pay_transactions');
 
+    my $transaction_status_list = join(",", map "'$_'", values(%$transaction_status));
+    my $transaction_status_default = "'".$transaction_status->{PENDING}."'";
     return C4::Context->dbh->do( "
         CREATE TABLE IF NOT EXISTS $table (
             `transaction_id` INT( 11 ) NOT NULL AUTO_INCREMENT,
@@ -288,6 +296,7 @@ sub install() {
             `borrowernumber` INT( 11 ),
             `accountlines_ids` mediumtext,
             `amount` decimal(28,6),
+            `status` ENUM($transaction_status_list) DEFAULT $transaction_status_default,
             `updated` TIMESTAMP,
             PRIMARY KEY (`transaction_id`)
         ) ENGINE = INNODB;
