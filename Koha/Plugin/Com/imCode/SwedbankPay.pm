@@ -8,10 +8,15 @@ use C4::Context;
 use C4::Auth qw( get_template_and_user );
 use Koha::Account;
 use Koha::Account::Lines;
+use Koha::Logger;
 use Koha::Patrons;
 
-use Locale::Currency::Format;
+use Data::Dumper;
+use JSON;
 use HTML::Entities;
+use HTTP::Request;
+use Locale::Currency::Format;
+use LWP::UserAgent;
 
 ## Here we set our plugin version
 our $VERSION = "00.00.01";
@@ -76,6 +81,7 @@ sub opac_online_payment_begin {
     my ( $self, $args ) = @_;
     my $cgi    = $self->{'cgi'};
     my $schema = Koha::Database->new()->schema();
+    my $logger = Koha::Logger->get;
 
     my ( $template, $borrowernumber ) = get_template_and_user(
         {
@@ -107,11 +113,33 @@ sub opac_online_payment_begin {
     }
     my $decimals = decimal_precision($local_currency);
 
+    my @order_items;
     my $sum = 0;
     for my $accountline ( $accountlines->all ) {
         # Track sum
         my $amount = sprintf "%." . $decimals . "f", $accountline->amountoutstanding;
         $sum = $sum + $amount;
+
+        my $acc_reference = ($accountline->debit_type_code ? $accountline->debit_type_code->code : "Fee") || "Fee";
+        my $acc_name = $accountline->description || "";
+        my $acc_class = $acc_reference;
+        $acc_class =~ s/[^\w-]//g;
+        my $acc_amount = $amount;
+        if ($decimals > 0) {
+            $acc_amount = $acc_amount * 10**$decimals;
+        }
+        push @order_items, {
+            reference => $acc_reference,
+            name => $acc_name,
+            type => 'PRODUCT',
+            class => $acc_class,
+            quantity => 1,
+            quantityUnit => 'pcs',
+            unitPrice => $acc_amount,
+            vatPercent => 0,
+            amount => $acc_amount,
+            vatAmount => 0,
+        }
     }
 
     # Create a transaction
@@ -123,52 +151,162 @@ sub opac_online_payment_begin {
     my $transaction_id =
       $dbh->last_insert_id( undef, undef, qw(swedbank_pay_transactions transaction_id) );
 
+    # Create orderReference, maxlength 50
+    my $order_id = substr( ($transaction_id . '-' . join('', map{('a'..'z','A'..'Z',0..9)[rand 62]} 0..47)), 0, 50 );
+
+    # Generate payee_reference
+    my $instance_name = $self->retrieve_data('SwedbankPayKohaInstanceName');
+    my $payee_reference = $instance_name . $transaction_id;
+    $payee_reference =~ s/[^a-zA-Z0-9,]//g; # allowed characters by Swedbank
+
+    $sth = $dbh->prepare("UPDATE $table SET `order_id`=?, `payee_reference`=? WHERE `transaction_id`=?");
+    $sth->execute($order_id, $payee_reference, $transaction_id);
+
     # ISO4217
     if ($decimals > 0) {
         $sum = $sum * 10**$decimals;
     }
 
-    # Construct redirect URI
-    my $accepturl = URI->new( C4::Context->preference('OPACBaseURL')
-          . "/cgi-bin/koha/opac-account-pay-return.pl?payment_method=Koha::Plugin::Com::imCode::SwedbankPay" );
+    # Construct host URI
+    my $host_url = C4::Context->preference('OPACBaseURL');
+
+    # Construct complete URI
+    my $complete_url = URI->new( C4::Context->preference('OPACBaseURL')
+          . "/cgi-bin/koha/opac-account-pay-return.pl?payment_method=Koha::Plugin::Com::imCode::SwedbankPay&order_id=$order_id" ) . "";
 
     # Construct callback URI
     my $callback_url =
       URI->new( C4::Context->preference('OPACBaseURL')
           . $self->get_plugin_http_path()
-          . "/callback.pl" );
+          . "/callback.pl?order_id=$order_id" ) . "";
 
     # Construct cancel URI
     my $cancel_url = URI->new( C4::Context->preference('OPACBaseURL')
-          . "/cgi-bin/koha/opac-account.pl?payment_method=Koha::Plugin::Com::imCode::SwedbankPay" );
+          . "/cgi-bin/koha/opac-account.pl?payment_method=Koha::Plugin::Com::imCode::SwedbankPay&order_id=$order_id" ) . "";
 
+    # Construct payment URI
+    my $payment_url = URI->new( C4::Context->preference('OPACBaseURL')
+          . "/cgi-bin/koha/opac-account.pl?payment_method=Koha::Plugin::Com::imCode::SwedbankPay&order_id=$order_id" ) . "";
 
-    # Test mode?
-    my $test = $self->retrieve_data('testMode');
+    # Construct terms of service URI
+    my $tos_url = $self->retrieve_data('SwedbankPayTosUrl');
 
-	$template->param(
+    # Construct payer
+    my $payer;
+    $payer->{email} = $borrower_result->email if $borrower_result->email;
 
-        SWEDBANKURL => 'https://payment.architrade.com/paymentweb/start.action',
+    # Construct orderItems
+    my $order_items;
 
-        # Required fields
-        accepturl    => $accepturl,
-        amount       => $sum,
-        callbackurl  => $callback_url,
-        currency     => $local_currency,
-        merchant     => $self->retrieve_data('SwedbankPayPayeeID'),
-        orderid      => $transaction_id,
-        
-        # Optional fields
-        lang               => C4::Languages::getlanguage(),
-        billingFirstName   => $borrower_result->firstname,
-        billingLastName    => $borrower_result->surname,
-        billingAddress     => $borrower_result->streetnumber . " " . $borrower_result->address,
-        billingAddress2    => $borrower_result->address2,
-        billingPostalCode  => $borrower_result->zipcode,
-        billingPostalPlace => $borrower_result->city,
-        email              => $borrower_result->email,
-        test               => $test
+    # Create Payment Order
+    # https://developer.swedbankpay.com/payment-menu/payment-order
+    my $ua = LWP::UserAgent->new;
+
+    my $host =
+      $self->retrieve_data('testMode')
+      ? 'api.externalintegration.payex.com'
+      : 'api.payex.com';
+    my $url = "https://$host/psp/paymentorders";
+
+    my $language = C4::Languages::getlanguage() || "sv-SE";
+    $language = 'en-US' if $language eq 'en'; # convert en to en-US
+
+    my $content_type = 'application/json; charset=utf-8';
+    my $auth_token = $self->retrieve_data('SwedbankPayMerchantToken');
+    my @req_headers = (
+        "Content-Type" => $content_type,
+        "Accept" => 'application/problem+json; q=1.0, application/json; q=0.9',
+        "Authorization" => "Bearer $auth_token",
     );
+
+    my $req_json = {
+        "paymentorder" => {
+            "operation" => "Purchase",
+            "currency" => $local_currency,
+            "amount" => $sum,
+            "vatAmount" => 0,
+            "description" => "Koha",
+            "userAgent" => "Mozilla/5.0 Koha",
+            "language" => $language,
+            "instrument" => JSON::null,
+            "generateRecurrenceToken" => JSON::false,
+            "generateUnscheduledToken" => JSON::false,
+            "generatePaymentToken" => JSON::false,
+            "urls" => {
+                "hostUrls" => [ $host_url ],
+                "completeUrl" => $complete_url,
+                "cancelUrl" => $cancel_url,
+                "callbackUrl" => $callback_url,
+#                "paymentUrl" => $payment_url, # must be excluded if redirect method is used
+                "termsOfServiceUrl" => $tos_url,
+                "logoUrl" => "",
+            },
+            "payeeInfo" => {
+                "payeeId" => $self->retrieve_data('SwedbankPayPayeeID'),
+                "payeeReference" => $payee_reference,
+                "orderReference" => $order_id,
+            },
+            "orderItems" => \@order_items,
+        }
+    };
+    $req_json->{payer} = $payer if $payer;
+
+    my $res = $ua->post( $url, 'Content' => encode_json $req_json, @req_headers );
+    my $redirect_url;
+    my $paymentorder_id;
+    my $error;
+    if ( $res->is_success && $res->code == 201 ) {
+        my $res_json;
+
+        # Validate JSON input
+        $res_json = eval { from_json( $res->decoded_content ); };
+        if ( $@ ) {
+            $error = 'PAYMENT_ORDER_CREATE_FAILED_MALFORMED_RESPONSE_JSON';
+            $logger->error( "SWEDBANKPAY $order_id: Malformed response JSON: " . $res->decoded_content );
+        }
+
+        # Make sure "operations" exists in response JSON
+        unless ( $res_json->{operations} ) {
+            $error = 'PAYMENT_ORDER_CREATE_FAILED_RESPONSE_OPERATIONS_MISSING';
+        }
+
+        # Get redirect-paymentorder URI
+        my $operations = $res_json->{operations};
+        foreach my $op ( @$operations ) {
+            if ( $op->{rel} eq 'redirect-paymentorder' ) {
+                $redirect_url = $op->{href};
+            }
+        };
+        unless ( $redirect_url ) {
+            $error = 'PAYMENT_ORDER_CREATE_FAILED_RESPONSE_OPERATIONS_REDIRECT_URL_MISSING';
+        }
+
+        # Make sure "paymentorder" exists in response JSON
+        if ( !$res_json->{paymentOrder} or !$res_json->{paymentOrder}->{id} ) {
+            $error = 'PAYMENT_ORDER_CREATE_FAILED_RESPONSE_PAYMENTORDER_ID_MISSING';
+        } else {
+            $paymentorder_id = $res_json->{paymentOrder}->{id};
+            $sth = $dbh->prepare( "UPDATE $table SET `swedbank_paymentorder_id`=? WHERE `transaction_id`=?" );
+            $sth->execute( $paymentorder_id, $transaction_id );
+        }
+    } else {
+        $error = 'PAYMENT_ORDER_CREATE_FAILED';
+        $logger->error( "SWEDBANKPAY $order_id: API error (" . $res->code . '): ' . Data::Dumper::Dumper( $res->decoded_content ) );
+    }
+
+    if ( $error ) {
+        $template->param(
+            error => $error,
+        );
+        $logger->error( "SWEDBANKPAY $order_id: $error" );
+    } else {
+        $template->param(
+            # Required fields
+            orderid               => $order_id,
+            swedbank_redirect_url => $redirect_url,
+        );
+        $logger->info( "SWEDBANKPAY $order_id: Started new payment $table.order_id: $order_id, $table.paymentorder_id: $paymentorder_id" );
+    }
 
     $self->output_html( $template->output() );
 }
@@ -259,21 +397,50 @@ sub configure {
         $template->param(
             enable_opac_payments => $self->retrieve_data('enable_opac_payments'),
             SwedbankPayMerchantToken => $self->retrieve_data('SwedbankPayMerchantToken'),
+            SwedbankPayKohaInstanceName => $self->retrieve_data('SwedbankPayKohaInstanceName'),
             SwedbankPayPayeeID   => $self->retrieve_data('SwedbankPayPayeeID'),
             SwedbankPayPayeeName => $self->retrieve_data('SwedbankPayPayeeName'),
-            testMode             => $self->retrieve_data('testMode')
+            SwedbankPayTosUrl    => $self->retrieve_data('SwedbankPayTosUrl'),
+            testMode             => $self->retrieve_data('testMode'),
         );
 
         $self->output_html( $template->output() );
     }
     else {
+        my $store_error_code;
+        unless ( $cgi->param('SwedbankPayKohaInstanceName') ) {
+            $store_error_code = 'EMPTY_KOHA_INSTANCE_NAME';
+        }
+        if ( length( $cgi->param('SwedbankPayKohaInstanceName') ) > 20 ) {
+            $store_error_code = 'KOHA_INSTANCE_NAME_TOO_LONG';
+        }
+
+        if ( $store_error_code ) {
+            my $template = $self->get_template( { file => 'configure.tt' } );
+
+            $template->param(
+                enable_opac_payments => $self->retrieve_data('enable_opac_payments'),
+                SwedbankPayKohaInstanceName => $self->retrieve_data('SwedbankPayKohaInstanceName'),
+                SwedbankPayMerchantToken => $self->retrieve_data('SwedbankPayMerchantToken'),
+                SwedbankPayPayeeID   => $self->retrieve_data('SwedbankPayPayeeID'),
+                SwedbankPayPayeeName => $self->retrieve_data('SwedbankPayPayeeName'),
+                SwedbankPayTosUrl    => $self->retrieve_data('SwedbankPayTosUrl'),
+                testMode             => $self->retrieve_data('testMode'),
+                error                => $store_error_code,
+            );
+
+            return $self->output_html( $template->output() );
+
+        }
         $self->store_data(
             {
                 enable_opac_payments => $cgi->param('enable_opac_payments'),
                 SwedbankPayMerchantToken => $cgi->param('SwedbankPayMerchantToken'),
+                SwedbankPayKohaInstanceName => $cgi->param('SwedbankPayKohaInstanceName'),
                 SwedbankPayPayeeID   => $cgi->param('SwedbankPayPayeeID'),
                 SwedbankPayPayeeName => $cgi->param('SwedbankPayPayeeName'),
-                testMode             => $cgi->param('testMode')
+                SwedbankPayTosUrl    => $cgi->param('SwedbankPayTosUrl'),
+                testMode             => $cgi->param('testMode'),
             }
         );
         $self->go_home();
@@ -291,11 +458,22 @@ sub install() {
 
     my $transaction_status_list = join(",", map "'$_'", values(%$transaction_status));
     my $transaction_status_default = "'".$transaction_status->{PENDING}."'";
+
+    # Set database name as default instance name
+    $self->store_data(
+        {
+            SwedbankPayKohaInstanceName => substr( C4::Context->config('database'), 0, 20 ),
+        }
+    );
+
     return C4::Context->dbh->do( "
         CREATE TABLE IF NOT EXISTS $table (
             `transaction_id` INT( 11 ) NOT NULL AUTO_INCREMENT,
             `accountline_id` INT( 11 ),
             `borrowernumber` INT( 11 ),
+            `order_id` VARCHAR( 50 ),
+            `payee_reference` VARCHAR( 30 ) UNIQUE,
+            `swedbank_paymentorder_id` VARCHAR( 255 ),
             `accountlines_ids` mediumtext,
             `amount` decimal(28,6),
             `status` ENUM($transaction_status_list) DEFAULT $transaction_status_default,

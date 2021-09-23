@@ -12,6 +12,16 @@
     <!-- We can access our own plugins resource files using the PLUGIN_PATH variable. -->
     <h3>Koha: Swedbank Pay: Configuration</h3>
 
+    [% IF error %]
+    <div class="dialog alert">
+        [% IF error == 'EMPTY_KOHA_INSTANCE_NAME' %]
+        <strong>Koha Instance Name</strong> cannot be empty. The instance is an unique identifier for this Koha instance. If you have other Koha installations using the same Swedbank Pay account, make sure you use different instance name for each instance.
+        [% ELSIF error == 'KOHA_INSTANCE_NAME_TOO_LONG' %]
+        <strong>Koha Instance Name</strong> is too long. Maximum length is 20 characters.
+        [% END %]
+    </div>
+    [% END %]
+
     <!-- Notice our form here has no 'action', this is good, it means that our forms will always get passed back to 'plugins/run.pl'. You could hard code it instead if you prefer -->
     <form method="get">
         <!-- Always pass these two parameters so the plugin system knows what to execute! -->
@@ -47,6 +57,17 @@
 
         <label for="SwedbankPayPayeeName">Payee Name: </label>
         <input type="text" name="SwedbankPayPayeeName" value="[% SwedbankPayPayeeName %]" />
+
+        <p>
+
+        <label for="SwedbankPayKohaInstanceName">Koha Instance Name: </label>
+        <input type="text" name="SwedbankPayKohaInstanceName" maxlength="20" value="[% SwedbankPayKohaInstanceName %]" />
+        <span>Prefix for receipt numbers. Maximum length 20 characters. Note: Instance name must be unique for each Koha instance using the same Swedbank Pay account!</span>
+
+        <p>
+
+        <label for="SwedbankPayTosUrl">Terms of Service URL: </label>
+        <input type="text" name="SwedbankPayTosUrl" value="[% SwedbankPayTosUrl %]" />
 
         <p>
 

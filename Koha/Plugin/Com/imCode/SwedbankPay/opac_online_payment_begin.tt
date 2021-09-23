@@ -9,39 +9,31 @@
 [% INCLUDE 'masthead.inc' %]
 
 <div class="main">
-    <ul class="breadcrumb">
+    <nav class="breadcrumb">
         <li><a href="/cgi-bin/koha/opac-main.pl">Home</a> <span class="divider">&rsaquo;</span></li>
         <li><a href="/cgi-bin/koha/opac-user.pl">[% borrower.firstname %] [% borrower.surname %]</a><span class="divider">&rsaquo;</span></li>
         <li><a href="#">Pay your fines and charges</a></li>
-    </ul>
+    </nav>
 
     <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span2">
+        <div class="row">
+            <div class="col col-lg-2 order-2 order-lg-1">
                 <div id="navigation">
                     [% INCLUDE 'navigation.inc' IsPatronPage=1 %]
                 </div>
             </div>
 
-            <div class="span10">
+            <div class="col-md-12 col-lg-10 order-1">
                 <div id="useraccount" class="maincontent">
-                    <p>
-                        Momentarily you will be redirected to the DIBS payment portal.
-                    </p>
-                
-                    <form id="swedbankpayform" method="post" action="[% SWEDBANKURL %]">
-                        [% IF test %]
-                        <input id="test" name="test" type="hidden" value="1"/>
-                        [% END %]
-                        <input id="accepturl" name="accepturl" type="hidden" value="[% accepturl %]"/>
-                        <input id="amount" name="amount" type="hidden" value="[% amount %]"/>
-                        <input id="callbackurl" name="callbackurl" type="hidden" value="[% callbackurl %]"/>
-                        <input id="currency" name="currency" type="hidden" value="[% currency %]"/>
-                        <input id="merchant" name="merchant" type="hidden" value="[% merchant %]"/>
-                        <input id="orderid" name="orderid" type="hidden" value="[% orderid %]"/>
-                        <input id="lang" name="lang" type="hidden" value="[% lang %]"/>
-                    </form>
-                </div>
+                <p><strong>Make a payment</strong></p>
+                [% IF error %]
+                    <div class="dialog alert">
+                       <strong>Something went wrong</strong>. Payment failed, please contact your library.
+                   </div>
+                [% ELSE %]
+                <p>Redirecting to Swedbank Pay...</p>
+                <p>If you are not redirected in 10 seconds, <a href="[% swedbank_redirect_url %]">click here</a>.
+                [% END %]
             </div>
         </div>
     </div>
@@ -50,9 +42,8 @@
 [% BLOCK jsinclude %][% END %]
 
 [% INCLUDE 'opac-bottom.inc' %]
-<script>
-$(document).ready(function() {
-  $('#swedbankpayform').submit();
-});
+<script type="text/javascript">
+[% IF swedbank_redirect_url %]
+window.location.href = "[% swedbank_redirect_url %]";
+[% END %]
 </script>
-
