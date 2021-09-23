@@ -10,9 +10,9 @@
 
 <div class="main">
     <ul class="breadcrumb">
-        <li><a href="/cgi-bin/koha/opac-main.pl">Hem</a> <span class="divider">&rsaquo;</span></li>
+        <li><a href="/cgi-bin/koha/opac-main.pl">Home</a> <span class="divider">&rsaquo;</span></li>
         <li><a href="/cgi-bin/koha/opac-user.pl">[% borrower.firstname %] [% borrower.surname %]</a><span class="divider">&rsaquo;</span></li>
-        <li><a href="#">Betala dina avgifter</a></li>
+        <li><a href="#">Pay your fines and charges</a></li>
     </ul>
 
     <div class="container-fluid">
@@ -26,7 +26,7 @@
             <div class="span10">
                 <div id="useraccount" class="maincontent">
                     <p>
-                        Du skickas nu vidare till Swedbank Pay betalningstjänst.
+                        Momentarily you will be redirected to the DIBS payment portal.
                     </p>
                 
                     <form id="swedbankpayform" method="post" action="[% SWEDBANKURL %]">
