@@ -258,6 +258,7 @@ sub configure {
         ## Grab the values we already have for our settings, if any exist
         $template->param(
             enable_opac_payments => $self->retrieve_data('enable_opac_payments'),
+            SwedbankPayMerchantToken => $self->retrieve_data('SwedbankPayMerchantToken'),
             SwedbankPayPayeeID   => $self->retrieve_data('SwedbankPayPayeeID'),
             SwedbankPayPayeeName => $self->retrieve_data('SwedbankPayPayeeName'),
             testMode             => $self->retrieve_data('testMode')
@@ -269,6 +270,7 @@ sub configure {
         $self->store_data(
             {
                 enable_opac_payments => $cgi->param('enable_opac_payments'),
+                SwedbankPayMerchantToken => $cgi->param('SwedbankPayMerchantToken'),
                 SwedbankPayPayeeID   => $cgi->param('SwedbankPayPayeeID'),
                 SwedbankPayPayeeName => $cgi->param('SwedbankPayPayeeName'),
                 testMode             => $cgi->param('testMode')

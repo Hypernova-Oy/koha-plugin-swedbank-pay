@@ -35,6 +35,11 @@
 
         <p>
 
+        <label for="SwedbankPayMerchantToken">Merchant Token: </label>
+        <input type="text" name="SwedbankPayMerchantToken" value="[% SwedbankPayMerchantToken %]" />
+
+        <p>
+
         <label for="SwedbankPayPayeeID">Payee ID: </label>
         <input type="text" name="SwedbankPayPayeeID" value="[% SwedbankPayPayeeID %]" />
 
