@@ -181,10 +181,6 @@ sub opac_online_payment_begin {
           . $self->get_plugin_http_path()
           . "/callback.pl?order_id=$order_id" ) . "";
 
-    # Construct cancel URI
-    my $cancel_url = URI->new( C4::Context->preference('OPACBaseURL')
-          . "/cgi-bin/koha/opac-account.pl?payment_method=Koha::Plugin::Com::imCode::SwedbankPay&order_id=$order_id" ) . "";
-
     # Construct payment URI
     my $payment_url = URI->new( C4::Context->preference('OPACBaseURL')
           . "/cgi-bin/koha/opac-account.pl?payment_method=Koha::Plugin::Com::imCode::SwedbankPay&order_id=$order_id" ) . "";
@@ -236,7 +232,7 @@ sub opac_online_payment_begin {
             "urls" => {
                 "hostUrls" => [ $host_url ],
                 "completeUrl" => $complete_url,
-                "cancelUrl" => $cancel_url,
+                "cancelUrl" => $complete_url,
                 "callbackUrl" => $callback_url,
 #                "paymentUrl" => $payment_url, # must be excluded if redirect method is used
                 "termsOfServiceUrl" => $tos_url,
@@ -357,9 +353,18 @@ sub opac_online_payment_end {
     }
 
     $sth   = $dbh->prepare(
-        "SELECT accountline_id FROM $table WHERE borrowernumber = ? AND order_id = ?");
+        "SELECT accountline_id, status FROM $table WHERE borrowernumber = ? AND order_id = ?");
     $sth->execute($borrowernumber, $order_id);
-    my ($accountline_id) = $sth->fetchrow_array();
+    my ($accountline_id, $status) = $sth->fetchrow_array();
+
+    if ( $status eq $transaction_status->{CANCELLED} ) {
+        $template->param(
+            message => 'cancelled_payment',
+            order_id  => $order_id,
+        );
+        return $self->output_html( $template->output() );
+    }
+
     my $line =
       Koha::Account::Lines->find( { accountlines_id => $accountline_id } );
     my $transaction_value = $line->amount;

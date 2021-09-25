@@ -27,6 +27,8 @@
                     <div class="alert alert-info">
                         [% IF message == 'valid_payment' %]
                             <p>Your payment of [% currency %] [% message_value %] has been processed sucessfully!</p>
+                        [% ELSIF message == 'cancelled_payment' %]
+                            <p>Your payment was cancelled.</p>
                         [% ELSIF message == 'no_amount' %]
                             <p>No amount was passed in!</p>
                             <p>Please contact a librarian for details.</p>
