@@ -7,12 +7,17 @@
 </head>
 <body id="opac-account" class="scrollto">
 [% INCLUDE 'masthead.inc' %]
+[% TRY %]
+    [% PROCESS "$PLUGIN_DIR/i18n/${LANG}.inc" %]
+[% CATCH %]
+    [% PROCESS "$PLUGIN_DIR/i18n/default.inc" %]
+[% END %]
 
 <div class="main">
     <nav class="breadcrumb">
-        <li><a href="/cgi-bin/koha/opac-main.pl">Home</a> <span class="divider">&rsaquo;</span></li>
+        <li><a href="/cgi-bin/koha/opac-main.pl">[% TOKENS.home_breadcrumb %]</a> <span class="divider">&rsaquo;</span></li>
         <li><a href="/cgi-bin/koha/opac-user.pl">[% borrower.firstname %] [% borrower.surname %]</a><span class="divider">&rsaquo;</span></li>
-        <li><a href="#">Pay your fines and charges</a></li>
+        <li><a href="#">[% TOKENS.your_payment_breadcrumb %]</a></li>
     </nav>
 
     <div class="container-fluid">
@@ -25,14 +30,14 @@
 
             <div class="col-md-12 col-lg-10 order-1">
                 <div id="useraccount" class="maincontent">
-                <p><strong>Make a payment</strong></p>
+                <p><strong>[% TOKENS.your_payment_breadcrumb %]</strong></p>
                 [% IF error %]
                     <div class="dialog alert">
-                       <strong>Something went wrong</strong>. Payment failed, please contact your library.
+                       <strong>[% TOKENS.error_occurred %]</strong> [% TOKENS.error_occurred_contact_library %]
                    </div>
                 [% ELSE %]
-                <p>Redirecting to Swedbank Pay...</p>
-                <p>If you are not redirected in 10 seconds, <a href="[% swedbank_redirect_url %]">click here</a>.
+                <p>[% TOKENS.redirect %]</p>
+                <p>[% TOKENS.redirect_click_label %] <a href="[% swedbank_redirect_url %]">[% TOKENS.redirect_click_link %]</a>.
                 [% END %]
             </div>
         </div>

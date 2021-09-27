@@ -94,6 +94,14 @@ sub opac_online_payment_begin {
         }
     );
 
+    my $language = C4::Languages::getlanguage($self->{'cgi'}) || "sv-SE";
+    $language = 'en-US' if $language eq 'en'; # convert en to en-US
+    # TODO: remove when PLUGIN_DIR gets automatically passed into template
+    $template->param(
+        LANG => $language,
+        PLUGIN_DIR => $self->bundle_path,
+    );
+
     # Get the borrower
     my $borrower_result = Koha::Patrons->find($borrowernumber);
 
@@ -204,9 +212,6 @@ sub opac_online_payment_begin {
       ? 'api.externalintegration.payex.com'
       : 'api.payex.com';
     my $url = "https://$host/psp/paymentorders";
-
-    my $language = C4::Languages::getlanguage() || "sv-SE";
-    $language = 'en-US' if $language eq 'en'; # convert en to en-US
 
     my $content_type = 'application/json; charset=utf-8';
     my $auth_token = $self->retrieve_data('SwedbankPayMerchantToken');
@@ -322,6 +327,14 @@ sub opac_online_payment_end {
             authnotrequired => 0,
             is_plugin       => 1,
         }
+    );
+
+    my $language = C4::Languages::getlanguage($self->{'cgi'}) || "sv-SE";
+    $language = 'en-US' if $language eq 'en'; # convert en to en-US
+    # TODO: remove when PLUGIN_DIR gets automatically passed into template
+    $template->param(
+        LANG => $language,
+        PLUGIN_DIR => $self->bundle_path,
     );
 
     my $order_id = $cgi->param('order_id');
