@@ -48,7 +48,7 @@
 
 [% INCLUDE 'opac-bottom.inc' %]
 <script type="text/javascript">
-[% IF swedbank_redirect_url %]
+[% IF swedbank_redirect_url && !error %]
 window.location.href = "[% swedbank_redirect_url %]";
 [% END %]
 </script>
