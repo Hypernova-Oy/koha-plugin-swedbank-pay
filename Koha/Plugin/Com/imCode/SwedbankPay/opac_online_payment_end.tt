@@ -22,12 +22,20 @@
 
     <div class="container-fluid">
         <div class="row">
+            [% IF koha_version > 2005 %]
             <div class="col col-lg-2 order-2 order-lg-1">
+            [% ELSE %]
+            <div class="span2">
+            [% END %]
                 <div id="navigation">
                     [% INCLUDE 'navigation.inc' IsPatronPage=1 %]
                 </div>
             </div>
+            [% IF koha_version > 2005 %]
             <div class="col-md-12 col-lg-10 order-1">
+            [% ELSE %]
+            <div class="span10">
+            [% END %]
                 <div id="useraccount" class="maincontent">
                     <div class="alert alert-info">
                         [% IF message == 'valid_payment' %]

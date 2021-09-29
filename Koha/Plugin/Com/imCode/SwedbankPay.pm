@@ -71,6 +71,17 @@ sub _version_check {
     return ( $kohaversion > $minversion );
 }
 
+sub _get_koha_version {
+    my ($self) = @_;
+
+    my $koha_version = C4::Context->preference('Version');
+    $koha_version =~ s/\.//g;
+    $koha_version = substr($koha_version, 0, 4); # this will be 2005, 2011, 2105 etc
+
+    # returns Koha version as an integer, easy to compare
+    return $koha_version;
+}
+
 sub opac_online_payment {
     my ( $self, $args ) = @_;
 
@@ -98,6 +109,7 @@ sub opac_online_payment_begin {
     $language = 'en-US' if $language eq 'en'; # convert en to en-US
     # TODO: remove when PLUGIN_DIR gets automatically passed into template
     $template->param(
+        koha_version => $self->_get_koha_version(),
         LANG => $language,
         PLUGIN_DIR => $self->bundle_path,
     );
@@ -333,6 +345,7 @@ sub opac_online_payment_end {
     $language = 'en-US' if $language eq 'en'; # convert en to en-US
     # TODO: remove when PLUGIN_DIR gets automatically passed into template
     $template->param(
+        koha_version => $self->_get_koha_version(),
         LANG => $language,
         PLUGIN_DIR => $self->bundle_path,
     );
@@ -862,4 +875,3 @@ sub install() {
 #}
 
 1;
-
