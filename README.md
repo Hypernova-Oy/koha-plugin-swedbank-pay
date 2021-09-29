@@ -14,6 +14,8 @@ To set up the Koha plugin system you must first make some changes to your instal
 
 Once set up is complete, navigate to /cgi-bin/koha/plugins/plugins-home.pl
 
+Click "Upload plugin" and upload the .kpz file
+
 # Apache setup
 
 You will need to add to the apache config for your site:
@@ -32,4 +34,11 @@ You will need to add to the apache config for your site:
 # Plugin configuration
 
 * Make sure that Koha's OPACBaseURL system preference is correctly set
-* Report your Swedbank Payee ID and Payee Name in the plugin configuration page
+* Go to https://your_koha_hostname/cgi-bin/koha/plugins/plugins-home.pl
+* Find Swedbank Payments Plugin, click Actions -> Configure
+* From your Swedbank Pay merchant admin panel, you will find "Payee ID" and "Merchant ID"
+* Add Payee ID and Merchant ID (Merchant Token) in the plugin configuration page.
+* Add Payee Name, it will be displayed when redirected to Swedbank Pay
+* Add Koha Instance Name. It MUST be unique among multiple Koha installations using the same Swedbank Pay account.
+  It will also be visible on receipts, prefixing the receipt number.
+* Add terms of service URL (e.g. https://your_library/payments_terms_of_service.pdf)
