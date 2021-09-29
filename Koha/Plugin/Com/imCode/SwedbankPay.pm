@@ -20,15 +20,15 @@ use Locale::Currency::Format;
 use LWP::UserAgent;
 
 ## Here we set our plugin version
-our $VERSION = "00.00.01";
+our $VERSION = "00.00.03";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
     name            => 'Swedbank Payments Plugin',
-    author          => 'imCode',
+    author          => 'imCode Partner AB and Hypernova Oy, Lari Taskula',
     date_authored   => '2021-09-06',
-    date_updated    => "2021-09-06",
-    minimum_version => '17.11.00.000',
+    date_updated    => "2021-09-29",
+    minimum_version => '20.05.00.000',
     maximum_version => '',
     version         => $VERSION,
     description     => 'This plugin implements online payments using '
