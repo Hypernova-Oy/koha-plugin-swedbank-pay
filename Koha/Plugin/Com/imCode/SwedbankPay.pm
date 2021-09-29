@@ -298,7 +298,7 @@ sub opac_online_payment_begin {
 
     if ( $error ) {
         $template->param(
-            error => $error,
+            swedbank_error => $error,
         );
         $logger->error( "SWEDBANKPAY $order_id: $error" );
     } else {
