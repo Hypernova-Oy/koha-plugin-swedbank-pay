@@ -802,13 +802,13 @@ sub configure {
         }
         $self->store_data(
             {
-                enable_opac_payments => $cgi->param('enable_opac_payments'),
-                SwedbankPayMerchantToken => $cgi->param('SwedbankPayMerchantToken'),
-                SwedbankPayKohaInstanceName => $cgi->param('SwedbankPayKohaInstanceName'),
-                SwedbankPayPayeeID   => $cgi->param('SwedbankPayPayeeID'),
-                SwedbankPayPayeeName => $cgi->param('SwedbankPayPayeeName'),
-                SwedbankPayTosUrl    => $cgi->param('SwedbankPayTosUrl'),
-                testMode             => $cgi->param('testMode'),
+                enable_opac_payments => scalar $cgi->param('enable_opac_payments'),
+                SwedbankPayMerchantToken => scalar $cgi->param('SwedbankPayMerchantToken'),
+                SwedbankPayKohaInstanceName => scalar $cgi->param('SwedbankPayKohaInstanceName'),
+                SwedbankPayPayeeID   => scalar $cgi->param('SwedbankPayPayeeID'),
+                SwedbankPayPayeeName => scalar $cgi->param('SwedbankPayPayeeName'),
+                SwedbankPayTosUrl    => scalar $cgi->param('SwedbankPayTosUrl'),
+                testMode             => scalar $cgi->param('testMode'),
             }
         );
         $self->go_home();
