@@ -48,27 +48,39 @@
         <label for="SwedbankPayMerchantToken">Merchant Token: </label>
         <input type="text" name="SwedbankPayMerchantToken" value="[% SwedbankPayMerchantToken %]" />
 
+        </p>
         <p>
 
         <label for="SwedbankPayPayeeID">Payee ID: </label>
         <input type="text" name="SwedbankPayPayeeID" value="[% SwedbankPayPayeeID %]" />
 
+        </p>
         <p>
 
         <label for="SwedbankPayPayeeName">Payee Name: </label>
         <input type="text" name="SwedbankPayPayeeName" value="[% SwedbankPayPayeeName %]" />
 
+        </p>
         <p>
 
         <label for="SwedbankPayKohaInstanceName">Koha Instance Name: </label>
         <input type="text" name="SwedbankPayKohaInstanceName" maxlength="20" value="[% SwedbankPayKohaInstanceName %]" />
         <span>Prefix for receipt numbers. Maximum length 20 characters. Note: Instance name must be unique for each Koha instance using the same Swedbank Pay account!</span>
 
+        </p>
         <p>
 
         <label for="SwedbankPayTosUrl">Terms of Service URL: </label>
         <input type="text" name="SwedbankPayTosUrl" value="[% SwedbankPayTosUrl %]" />
 
+        </p>
+        <p>
+
+        <label for="SwedbankCurrency">Currency: </label>
+        <input type="text" name="SwedbankCurrency" value="[% SwedbankCurrency %]" />
+        <span>Alphabetic ISO 4217 code from <a href="https://www.iban.com/currency-codes" target="_blank">https://www.iban.com/currency-codes</a>, e.g. SEK</span>
+
+        </p>
         <p>
 
         <label for="testMode">Test mode: </label>
@@ -77,11 +89,13 @@
             <option value="1" [% IF testMode %] selected="selected" [% END %]>Enabled</option>
         </select>
 
+        </p>
         <p>
 
         <input type="hidden" name="save" value="1" />
 
         <input type="submit" value="Save configuration" />
+        </p>
     </form>
 
 [% INCLUDE 'intranet-bottom.inc' %]

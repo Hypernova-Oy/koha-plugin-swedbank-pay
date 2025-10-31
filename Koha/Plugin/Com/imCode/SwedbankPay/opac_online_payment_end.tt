@@ -16,7 +16,7 @@
 <div class="main">
     <ul class="breadcrumb">
         <li><a href="/cgi-bin/koha/opac-main.pl">[% TOKENS.home_breadcrumb %]</a> <span class="divider">&rsaquo;</span></li>
-        <li><a href="/cgi-bin/koha/opac-user.pl">[% borrower.firstname %] [% borrower.surname %]</a><span class="divider">&rsaquo;</span></li>
+        <li><a href="/cgi-bin/koha/opac-user.pl">[% patron.firstname %] [% patron.surname %]</a><span class="divider">&rsaquo;</span></li>
         <li><a href="#">[% TOKENS.payment_result_breadcrumb %]</a></li>
     </ul>
 
@@ -42,6 +42,8 @@
                             <p>[% TOKENS.your_payment_of %][% currency %] [% message_value %][% TOKENS.payment_process_success %]</p>
                         [% ELSIF message == 'cancelled_payment' %]
                             <p>[% TOKENS.payment_cancelled %]</p>
+                        [% ELSIF message == 'already_paid' %]
+                            <p>[% TOKENS.already_paid %]</p>
                         [% ELSIF message == 'no_amount' %]
                             <p>[% TOKENS.no_amount %]</p>
                             <p>[% TOKENS.contact_librarian %]</p>
@@ -53,6 +55,7 @@
                             <p>[% TOKENS.contact_librarian %]</p>
                             <p>[% TOKENS.order_id %]: [% order_id %]</p>
                         [% END %]
+                        <p>[% TOKENS.return_to_your_charges %]</p>
                     </div>
                 </div> <!-- / #useraccount -->
             </div> <!-- / .span10 -->
