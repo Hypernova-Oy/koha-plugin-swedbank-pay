@@ -250,9 +250,6 @@ sub opac_online_payment_begin {
             "userAgent"                => "Mozilla/5.0 Koha",
             "language"                 => $language,
             "instrument"               => JSON::null,
-            "generateRecurrenceToken"  => JSON::false,
-            "generateUnscheduledToken" => JSON::false,
-            "generatePaymentToken"     => JSON::false,
             "urls"                     => {
                 "hostUrls"    => [$host_url],
                 "completeUrl" => $complete_url,
