@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-  
+
 # Copyright 2015 PTFS Europe
 #
 # This file is part of Koha.
@@ -33,21 +33,20 @@ use Locale::Currency;
 use Locale::Currency::Format;
 
 my $paymentHandler = Koha::Plugin::Com::imCode::SwedbankPay->new;
-my $input = new CGI;
-my $order_id = $input->url_param('order_id');
+my $input          = new CGI;
+my $order_id       = $input->url_param('order_id');
 
-if ( $order_id ) {
+if ($order_id) {
     my $table = $paymentHandler->get_qualified_table_name('swedbank_pay_transactions');
     my $dbh   = C4::Context->dbh;
-    my $sth   = $dbh->prepare(
-        "SELECT borrowernumber FROM $table WHERE order_id = ?");
+    my $sth   = $dbh->prepare("SELECT borrowernumber FROM $table WHERE order_id = ?");
     $sth->execute($order_id);
-    my ($borrowernumber, $accountlines_string, $amount) = $sth->fetchrow_array();
-    
-    unless ( $borrowernumber ) {
-        return print $input->header( -status => '404 Not Found');
+    my ( $borrowernumber, $accountlines_string, $amount ) = $sth->fetchrow_array();
+
+    unless ($borrowernumber) {
+        return print $input->header( -status => '404 Not Found' );
     }
 
-    $paymentHandler->process_transaction( $order_id );
-    print $input->header( -status => '200 OK');
+    $paymentHandler->process_transaction($order_id);
+    print $input->header( -status => '200 OK' );
 }
