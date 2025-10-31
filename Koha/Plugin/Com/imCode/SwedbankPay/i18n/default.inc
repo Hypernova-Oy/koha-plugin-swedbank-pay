@@ -1,5 +1,6 @@
 [%
 TOKENS = {
+  "already_paid" = "This payment has already been processed and paid."
   "contact_librarian" = "Please contact a librarian for details."
   "error_occurred" = "Something went wrong - payment failed"
   "error_occurred_contact_library" = ". Please contact the library."
@@ -12,6 +13,7 @@ TOKENS = {
   "redirect" = "Redirecting to Swedbank Pay..."
   "redirect_click_label" = "If you are not redirected in 10 seconds,"
   "redirect_click_link" = "click here"
+  "return_to_your_charges" = "Return to <a href=\"/cgi-bin/koha/opac-account.pl\">your charges</a>."
   "transaction_not_found" = "Transaction not found."
   "unknown_error" = "Unknown error."
   "your_payment_breadcrumb" = "Your Payment"

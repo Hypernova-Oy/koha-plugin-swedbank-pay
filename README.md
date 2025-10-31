@@ -1,9 +1,9 @@
 # Introduction
 This Koha plugin enables a library to accept online payments from patrons using the Swedbank Pay platform.
 
+It uses Swedbank Payments API v3.1.
+
 # Installing
-This plugin needs the following perl modules:
-* Locale::Currency::Format (liblocale-currency-format-perl)
 
 To set up the Koha plugin system you must first make some changes to your install.
 
@@ -16,21 +16,6 @@ Once set up is complete, navigate to /cgi-bin/koha/plugins/plugins-home.pl
 
 Click "Upload plugin" and upload the .kpz file
 
-# Apache setup
-
-You will need to add to the apache config for your site:
-```
-   Alias /plugin/ "/var/lib/koha/kohadev/plugins/"
-   # The stanza below is needed for Apache 2.4+
-   <Directory /var/lib/koha/kohadev/plugins/>
-         Options Indexes FollowSymLinks
-         AllowOverride None
-         Require all granted
-         Options +ExecCGI
-         AddHandler cgi-script .pl
-    </Directory>
-```
-
 # Plugin configuration
 
 * Make sure that Koha's OPACBaseURL system preference is correctly set
@@ -42,3 +27,9 @@ You will need to add to the apache config for your site:
 * Add Koha Instance Name. It MUST be unique among multiple Koha installations using the same Swedbank Pay account.
   It will also be visible on receipts, prefixing the receipt number.
 * Add terms of service URL (e.g. https://your_library/payments_terms_of_service.pdf)
+
+# Logging
+
+This plugin will log evenets to `plack-opac-error.log` and `api-error.log`.
+
+By enabling system preference `FinesLog`, this plugin logs payment events to Koha's action logs under `FINES` module.
