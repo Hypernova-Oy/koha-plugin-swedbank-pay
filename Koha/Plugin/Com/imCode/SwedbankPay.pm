@@ -520,7 +520,11 @@ sub opac_online_payment_end {
             if (   $_->isa('Koha::Plugin::Com::imCode::SwedbankPay::Exceptions::Transaction')
                 || $_->isa('Koha::Plugin::Com::imCode::SwedbankPay::Exceptions::APIError') )
             {
-                $patron = $_->can('patron') ? $_->patron->unblessed : undef;
+                $patron = $_->can('patron') ? $_->patron : undef; # patron is expected to be unblessed
+                if ( !$patron && $borrowernumber ) {
+                   $patron = Koha::Patrons->find($borrowernumber);
+                   $patron = $patron->unblessed if $patron;
+                }
                 $template->param( message => $_->error_code, order_id => $order_id, patron => $patron );
                 $self->logger->error(
                     ref($_) . ': ' . $_->error . ', dump: ' . Data::Dumper::Dumper( $_->field_hash ) );

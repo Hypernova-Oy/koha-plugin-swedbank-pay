@@ -16,7 +16,7 @@
 <div class="main">
     <ul class="breadcrumb">
         <li><a href="/cgi-bin/koha/opac-main.pl">[% TOKENS.home_breadcrumb %]</a> <span class="divider">&rsaquo;</span></li>
-        <li><a href="/cgi-bin/koha/opac-user.pl">[% patron.firstname %] [% patron.surname %]</a><span class="divider">&rsaquo;</span></li>
+        <li><a href="/cgi-bin/koha/opac-user.pl">[% IF (patron) %][% patron.firstname %] [% patron.surname %][% ELSE %]Your summary[% END %]</a><span class="divider">&rsaquo;</span></li>
         <li><a href="#">[% TOKENS.payment_result_breadcrumb %]</a></li>
     </ul>
 
