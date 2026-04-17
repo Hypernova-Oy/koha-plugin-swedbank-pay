@@ -23,14 +23,14 @@ use Koha::Plugin::Com::imCode::SwedbankPay::Exceptions::APIError;
 use Koha::Plugin::Com::imCode::SwedbankPay::Exceptions::Transaction;
 
 ## Here we set our plugin version
-our $VERSION = "3.1.1";
+our $VERSION = "3.1.2";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
     name            => 'Swedbank Payments Plugin',
     author          => 'imCode Partner AB and Hypernova Oy, Lari Taskula',
     date_authored   => '2021-09-06',
-    date_updated    => "2025-11-03",
+    date_updated    => "2026-04-17",
     minimum_version => '24.05.00.000',
     maximum_version => '',
     version         => $VERSION,
